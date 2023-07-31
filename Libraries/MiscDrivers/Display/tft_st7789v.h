@@ -2,8 +2,9 @@
  * @file    tft_st7789v.h
  * @brief   Driver for NewHaven 2.4" TFT display
  */
-/* ****************************************************************************
- * Copyright (C) 2022 Maxim Integrated Products, Inc., All Rights Reserved.
+
+/******************************************************************************
+ * Copyright (C) 2023 Maxim Integrated Products, Inc., All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,7 +34,7 @@
  * property whatsoever. Maxim Integrated Products, Inc. retains all
  * ownership rights.
  *
- *************************************************************************** */
+ ******************************************************************************/
 
 #ifndef LIBRARIES_MISCDRIVERS_DISPLAY_TFT_ST7789V_H_
 #define LIBRARIES_MISCDRIVERS_DISPLAY_TFT_ST7789V_H_
@@ -248,6 +249,17 @@ void MXC_TFT_ShowImageCameraMono(int x0, int y0, uint8_t *image, int width, int 
 void MXC_TFT_ShowImageCameraRGB565(int x0, int y0, uint8_t *image, int iWidth, int iHeight);
 
 /**
+ * @brief      Draw a RGB565 buffer to a window location
+ *
+ * @param      x0           x location of image
+ * @param      y0           y location of image
+ * @param      image        RGB565 image buffer (pointer)
+ * @param      width        image width
+ * @param      height       image height
+ */
+void MXC_TFT_WriteBufferRGB565(int x0, int y0, uint8_t *image, int width, int height);
+
+/**
  * @brief      Fills screen with one color
  *
  * @param      color            Index of screen color
@@ -291,7 +303,7 @@ void MXC_TFT_SetFont(int font_id);
  *
  * @param      format           Char array formatted like printf
  *             NOTE: up to 3 additional arguments are supported
- * 
+ *
  *  \note Unimplemented function.
  */
 void MXC_TFT_Printf(const char *format, ...);
@@ -389,6 +401,16 @@ void MXC_TFT_Line(int x0, int y0, int x1, int y1, int color);
  * @param       color           Rectangle color
  */
 void MXC_TFT_Rectangle(int x0, int y0, int x1, int y1, int color);
+
+/**
+ * @brief      Stream camera to TFT
+ *
+ * @param      x0           x location of image
+ * @param      y0           y location of image
+ * @param      width        image width
+ * @param      height       image height
+ */
+void MXC_TFT_Stream(int x0, int y0, int width, int height);
 /**@} end of group tft_st7789v */
 
 #ifdef __cplusplus

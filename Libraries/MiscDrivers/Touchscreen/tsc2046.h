@@ -42,7 +42,7 @@
 #include <gpio.h>
 
 /************************************************************************************/
-#define TS_MAX_BUTTONS 16
+#define TS_MAX_BUTTONS 32
 #define TS_INVALID_KEY_CODE -1
 
 typedef enum {
