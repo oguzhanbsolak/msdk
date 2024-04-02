@@ -62,6 +62,8 @@
 #define MXC_GPIO_PORT_INTERRUPT_IN_2 MXC_GPIO2
 #define MXC_GPIO_PIN_INTERRUPT_IN_2 MXC_GPIO_PIN_6
 
+#define DATABASE_RESET_MODE
+
 extern volatile uint8_t face_detected;
 volatile uint8_t record_mode = 0;
 volatile uint8_t capture_key = 0;
@@ -209,8 +211,26 @@ void init_names()
 
 void gpio_isr(void *cbdata)
 {
-    record_mode = 1; //Toggle record mode
-    PR_DEBUG("TOGGLED record_mode = %d\n", record_mode);
+    #ifdef DATABASE_RESET_MODE
+        int err;
+        err = init_db();
+        if (err) {
+            printf("Failed to initialize database", err);
+            return;
+        }
+        err = init_status();
+        if (err) {
+            printf("Failed to initialize status", err);
+            return;
+        }
+        printf("Database reset\n");
+        // Reload default weights
+        cnn_3_load_weights();
+        cnn_3_configure();
+    #else
+        record_mode = 1; //Toggle record mode
+        PR_DEBUG("TOGGLED record_mode = %d\n", record_mode);
+    #endif
 }
 
 void gpio_isr_2(void *cbdata)
@@ -244,6 +264,10 @@ int main(void)
     int after_record = 1;
     mxc_uart_regs_t *ConsoleUart;
     text_t text_buffer;
+    Person p;
+    Person *pptr = &p;
+    int db_count = 0;
+    int loc_db_count = -1;
 
     /* Enable cache */
     MXC_ICC_Enable(MXC_ICC0);
@@ -351,6 +375,20 @@ int main(void)
 #ifdef TS_ENABLE
     MXC_TS_Init();
     MXC_TS_Start();
+    #ifdef DATABASE_RESET_MODE
+        mxc_gpio_cfg_t gpio_interrupt;
+        gpio_interrupt.port = MXC_GPIO_PORT_INTERRUPT_IN;
+        gpio_interrupt.mask = MXC_GPIO_PIN_INTERRUPT_IN;
+        gpio_interrupt.pad = MXC_GPIO_PAD_PULL_UP;
+        gpio_interrupt.func = MXC_GPIO_FUNC_IN;
+        gpio_interrupt.vssel = MXC_GPIO_VSSEL_VDDIOH;
+        MXC_GPIO_Config(&gpio_interrupt);
+        MXC_GPIO_RegisterCallback(&gpio_interrupt, gpio_isr, NULL);
+        MXC_GPIO_IntConfig(&gpio_interrupt, MXC_GPIO_INT_FALLING);
+        MXC_GPIO_EnableInt(gpio_interrupt.port, gpio_interrupt.mask);
+        NVIC_EnableIRQ(MXC_GPIO_GET_IRQ(MXC_GPIO_GET_IDX(MXC_GPIO_PORT_INTERRUPT_IN)));
+    #endif
+
 
 #else
     mxc_gpio_cfg_t gpio_interrupt;
@@ -407,6 +445,19 @@ int main(void)
             text_buffer.len = 6;
             MXC_TFT_PrintFont(162, 270, font, &text_buffer, NULL);
         }
+        get_status(pptr);
+        db_count = pptr->db_embeddings_count;
+        if (loc_db_count != db_count) {
+            loc_db_count = db_count;
+            char db_count_str[10];
+            sprintf(db_count_str, "%d", db_count);
+            char db_count_str_full[20] = "Emb Cnt: ";
+            strcat(db_count_str_full, db_count_str);
+            text_buffer.data = db_count_str_full;
+            text_buffer.len = strlen(db_count_str_full);
+            MXC_TFT_PrintFont(3, 3, font, &text_buffer, NULL);
+        }
+
 
         key = MXC_TS_GetKey();
 

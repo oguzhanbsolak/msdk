@@ -27,8 +27,19 @@
 #define SHOW_START_X (TFT_WIDTH - HEIGHT_ID) / 2
 #define SHOW_START_Y (TFT_HEIGHT - WIDTH_ID) / 2
 
+
+struct person {
+    char name[7];
+    uint32_t id;
+    uint32_t embeddings_count;
+    uint32_t db_embeddings_count;
+};
+typedef struct person Person;
 int record();
 void show_keyboard();
 void init_cnn_from_flash();
+int init_db();
+int init_status();
+void get_status(Person *p);
 
 #endif // _RECORD_H_

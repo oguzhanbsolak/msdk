@@ -104,15 +104,6 @@ Example Status Field :
         C : Total embeddings count in the database (32 bits)
 */
 
-struct person {
-    char name[7];
-    uint32_t id;
-    uint32_t embeddings_count;
-    uint32_t db_embeddings_count;
-};
-
-typedef struct person Person;
-
 /***** Globals *****/
 volatile uint32_t isr_cnt;
 volatile uint32_t isr_flags;
